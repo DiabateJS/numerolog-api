@@ -4,7 +4,6 @@ include "resultdata.class.php";
 include "queries.class.php";
 include "internbre.class.php";
 include "util.class.php";
-include "categorie.class.php";
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: *');
