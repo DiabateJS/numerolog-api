@@ -14,235 +14,144 @@ $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 ];
 
+$ERROR_400_MSG = "Erreur de formulation de la requete : Nbre de parametres insuffisants";
+
+class Method {
+    static $NBRE_INTER = "getNbreInter";
+    static $ALL_NBRE_INTER = "getAllNbreInter";
+}
+
+class TypeNbre {
+    static $INTIME = "nbre_intime";
+    static $REALISATION = "nbre_realisation";
+    static $EXPRESSION = "nbre_expression";
+    static $HEREDITAIRE = "nbre_hereditaire";
+    static $ACTIF = "nbre_actif";
+    static $MANQUANT = "nbre_manquant";
+    static $DOMINANT = "nbre_dominant";
+    static $CHEMIN_VIE = "nbre_chemin_vie";
+}
+
+
+function getNbreDico($nbre){
+    return [
+           "nbre" => $nbre
+       ];
+}
+
+function queryFromMethodType($type){
+    $dico = [
+        TypeNbre::$INTIME => Query::$SQL_SELECT_NBRE_INTIME,
+        TypeNbre::$REALISATION => Query::$SQL_SELECT_NBRE_REALISATION,
+        TypeNbre::$EXPRESSION => Query::$SQL_SELECT_NBRE_EXPRESSION,
+        TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_NBRE_HEREDITAIRE,
+        TypeNbre::$ACTIF => Query::$SQL_SELECT_NBRE_ACTIF,
+        TypeNbre::$MANQUANT => Query::$SQL_SELECT_NBRE_MANQUANT,
+        TypeNbre::$DOMINANT => Query::$SQL_SELECT_NBRE_DOMINANT,
+        TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_NBRE_CHEMIN_VIE
+    ];
+    $res = "";
+    if (array_key_exists($type, $dico)){
+        $res = $dico[$type];
+    }
+    return $res;
+}
+
+function allDataQueryFromMethodType($type){
+    $dico = [
+        TypeNbre::$INTIME => Query::$SQL_SELECT_ALL_NBRE_INTIME,
+        TypeNbre::$REALISATION => Query::$SQL_SELECT_ALL_NBRE_REALISATION,
+        TypeNbre::$EXPRESSION => Query::$SQL_SELECT_ALL_NBRE_EXPRESSION,
+        TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_ALL_NBRE_HEREDITAIRE,
+        TypeNbre::$ACTIF => Query::$SQL_SELECT_ALL_NBRE_ACTIF,
+        TypeNbre::$MANQUANT => Query::$SQL_SELECT_ALL_NBRE_MANQUANT,
+        TypeNbre::$DOMINANT => Query::$SQL_SELECT_ALL_NBRE_DOMINANT,
+        TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_ALL_NBRE_CHEMIN_VIE
+    ];
+    $res = "";
+    if (array_key_exists($type, $dico)){
+        $res = $dico[$type];
+    }
+    return $res;
+}
+
+/*
+PDOStatement::execute, prepare, query
+Errors/Exceptions
+- PDOException
+*/
+
+function getNbreInterResult($pdo, $nbre, $type){
+    $result = new ResultData(false, null, null);
+    try{
+        $stmt = $pdo->prepare(queryFromMethodType($type));
+        $stmt->execute(getNbreDico($nbre));
+        $nbreInter = null;
+        if ($stmt->rowCount() == 0){
+            $msg = "L interpretation du nbre ".$nbre." n est pas disponible en base";
+            $result->setMessage($msg);
+        }else{
+            $c = $stmt->fetch();
+            $nbreInter = new InterNbre($c["nbre"],$c["interpretation"]);
+            $result->setData($nbreInter);
+        }
+        http_response_code(200);
+    }catch(Exception $e){
+        echo "Erreur survenue : ".$e->getMessage();
+        $result->setError(true);
+        $result->setMessage($e->getMessage());
+        http_response_code(500);
+    }
+    return $result;
+}
+
+function getAllTypeNbreInterResult($pdo, $type){
+    $result = new ResultData(false, null, null);
+    try{
+        $all = $pdo->query(allDataQueryFromMethodType($type))->fetchAll();
+        $intersNbre = [];
+        foreach($all as $c){
+            $interNbre = new InterNbre($c["nbre"],$c["interpretation"]);
+            $intersNbre[] = $interNbre;
+        }
+        $result->setData($intersNbre);
+        http_response_code(200);
+    }catch(Exception $e){
+        echo "Erreur survenue : ".$e->getMessage();
+        $result->setError(true);
+        $result->setMessage($e->getMessage());
+        http_response_code(500);
+    }
+    return $result;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "GET"){
     $method= $_GET["method"];
     $params= $_GET["params"];
     $pdo = new PDO(DatabaseConfig::getConStr(), DatabaseConfig::$USER, DatabaseConfig::$PASSWORD);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Pour la gestion des exceptions
     $tab = explode(";",$params);
-    if ($method == "getNbreInter"){
-        if (count($tab) == 2){
-            $type = $tab[0];
+    if ($method == Method::$NBRE_INTER){
+        $result = new ResultData(false, null, null);
+        if (count($tab) > 1){
+            $type = strtolower($tab[0]);
             $nbre = $tab[1];
-            if (strtolower($type) == "nbre_intime"){
-                $result = new ResultData(false, null, null);
-                $nbreIntimeDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_INTIME);
-                $stmt->execute($nbreIntimeDico);
-                $nbreIntimeInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreIntimeInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreIntimeInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_realisation"){
-                $result = new ResultData(false, null, null);
-                $nbreRealisationDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_REALISATION);
-                $stmt->execute($nbreRealisationDico);
-                $nbreRealisationInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreRealisationInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreRealisationInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_expression"){
-                $result = new ResultData(false, null, null);
-                $nbreExpressionDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_EXPRESSION);
-                $stmt->execute($nbreExpressionDico);
-                $nbreExpressionInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreExpressionInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreExpressionInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_hereditaire"){
-                $result = new ResultData(false, null, null);
-                $nbreHereditaireDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_HEREDITAIRE);
-                $stmt->execute($nbreHereditaireDico);
-                $nbreHereditaireInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreHereditaireInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreHereditaireInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_actif"){
-                $result = new ResultData(false, null, null);
-                $nbreActifDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_ACTIF);
-                $stmt->execute($nbreActifDico);
-                $nbreActifInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreActifInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreActifInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_manquant"){
-                $result = new ResultData(false, null, null);
-                $nbreManquantDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_MANQUANT);
-                $stmt->execute($nbreManquantDico);
-                $nbreManquantInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreManquantInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreManquantInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_dominant"){
-                $result = new ResultData(false, null, null);
-                $nbreDominantDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_DOMINANT);
-                $stmt->execute($nbreDominantDico);
-                $nbreDominantInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreDominantInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreDominantInter);
-                    http_response_code(200);
-                }
-            }
-            if (strtolower($type) == "nbre_chemin_vie"){
-                $result = new ResultData(false, null, null);
-                $nbreCheminVieDico = [
-                    "nbre" => $nbre
-                ];
-                $stmt = $pdo->prepare(Query::$SQL_SELECT_NBRE_CHEMIN_VIE);
-                $stmt->execute($nbreCheminVieDico);
-                $nbreCheminVieInter = null;
-                if ($stmt->rowCount() == 1){
-                    $c = $stmt->fetch();
-                    $nbreCheminVieInter = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $result->setData($nbreCheminVieInter);
-                    http_response_code(200);
-                }
-            }
+            $result = getNbreInterResult($pdo, $nbre, $type);
         }else{
-            $result->setMessage("Interpretation du nombre ".$nbre." introuvable");
+            $result->setError(true);
+            $result->setMessage($ERROR_400_MSG);
             http_response_code(400);
         }
         echo json_encode($result);
     }
-    if ($method == "getAllNbreInter"){
+    if ($method == Method::$ALL_NBRE_INTER){
         $result = new ResultData(false, null, null);
-        if (count($tab) == 1){
-            $type = $tab[0];
-            if ($type == "nbre_intime"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_INTIME)->fetchAll();
-                $nbreIntimes = [];
-                foreach($all as $c){
-                    $nbreIntime = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreIntimes[] = $nbreIntime;
-                }
-                $result->setData($nbreIntimes);
-                http_response_code(200);
-                echo json_encode($nbreIntimes);
-            }
-            if ($type == "nbre_realisation"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_REALISATION)->fetchAll();
-                $nbreRealisations = [];
-                foreach($all as $c){
-                    $nbreRealisation = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreRealisations[] = $nbreRealisation;
-                }
-                $result->setData($nbreRealisations);
-                http_response_code(200);
-                echo json_encode($nbreRealisations);
-            }
-            if ($type == "nbre_expression"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_EXPRESSION)->fetchAll();
-                $nbreExpressions = [];
-                foreach($all as $c){
-                    $nbreExpression = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreExpressions[] = $nbreExpression;
-                }
-                $result->setData($nbreExpressions);
-                http_response_code(200);
-                echo json_encode($nbreExpressions);
-            }
-            if ($type == "nbre_hereditaire"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_HEREDITAIRE)->fetchAll();
-                $nbreHereditaires = [];
-                foreach($all as $c){
-                    $nbreHereditaire = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreHereditaires[] = $nbreHereditaire;
-                }
-                $result->setData($nbreHereditaires);
-                http_response_code(200);
-                echo json_encode($nbreHereditaires);
-            }
-            if ($type == "nbre_actif"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_ACTIF)->fetchAll();
-                $nbreActifs = [];
-                foreach($all as $c){
-                    $nbreActif = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreActifs[] = $nbreActif;
-                }
-                $result->setData($nbreActifs);
-                http_response_code(200);
-                echo json_encode($nbreActifs);
-            }
-            if ($type == "nbre_manquant"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_MANQUANT)->fetchAll();
-                $nbreManquants = [];
-                foreach($all as $c){
-                    $nbreManquant = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreManquants[] = $nbreManquant;
-                }
-                $result->setData($nbreManquants);
-                http_response_code(200);
-                echo json_encode($nbreManquants);
-            }
-            if ($type == "nbre_dominant"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_DOMINANT)->fetchAll();
-                $nbreDominants = [];
-                foreach($all as $c){
-                    $nbreDominant = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreDominants[] = $nbreDominant;
-                }
-                $result->setData($nbreDominants);
-                http_response_code(200);
-                echo json_encode($nbreDominants);
-            }
-            if ($type == "nbre_chemin_vie"){
-                $all = $pdo->query(Query::$SQL_SELECT_ALL_NBRE_CHEMIN_VIE)->fetchAll();
-                $nbreCheminVies = [];
-                foreach($all as $c){
-                    $nbreCheminVie = new InterNbre($c["nbre"],$c["interpretation"]);
-                    $nbreCheminVies[] = $nbreCheminVie;
-                }
-                $result->setData($nbreCheminVies);
-                http_response_code(200);
-                echo json_encode($nbreCheminVies);
-            }
+        if (count($tab) > 0){
+            $type = strtolower($tab[0]);
+            $result = getAllTypeNbreInterResult($pdo, $type);
+            echo json_encode($result->getData());
         }else{
-            $result->setMessage("Interpretation du nombre : parametres incorrectes");
+            $result->setMessage($ERROR_400_MSG);
             http_response_code(400);
             echo json_encode($result);
         }
