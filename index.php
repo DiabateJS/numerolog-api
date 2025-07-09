@@ -15,97 +15,6 @@ header('Access-Control-Allow-Headers: *');
 header('Content-Type: application/json');
 
 
-function getNbreDico($nbre){
-    return [
-           "nbre" => $nbre
-       ];
-}
-
-function queryFromMethodType($type){
-    $dico = [
-        TypeNbre::$INTIME => Query::$SQL_SELECT_NBRE_INTIME,
-        TypeNbre::$REALISATION => Query::$SQL_SELECT_NBRE_REALISATION,
-        TypeNbre::$EXPRESSION => Query::$SQL_SELECT_NBRE_EXPRESSION,
-        TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_NBRE_HEREDITAIRE,
-        TypeNbre::$ACTIF => Query::$SQL_SELECT_NBRE_ACTIF,
-        TypeNbre::$MANQUANT => Query::$SQL_SELECT_NBRE_MANQUANT,
-        TypeNbre::$DOMINANT => Query::$SQL_SELECT_NBRE_DOMINANT,
-        TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_NBRE_CHEMIN_VIE
-    ];
-    $res = "";
-    if (array_key_exists($type, $dico)){
-        $res = $dico[$type];
-    }
-    return $res;
-}
-
-function allDataQueryFromMethodType($type){
-    $dico = [
-        TypeNbre::$INTIME => Query::$SQL_SELECT_ALL_NBRE_INTIME,
-        TypeNbre::$REALISATION => Query::$SQL_SELECT_ALL_NBRE_REALISATION,
-        TypeNbre::$EXPRESSION => Query::$SQL_SELECT_ALL_NBRE_EXPRESSION,
-        TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_ALL_NBRE_HEREDITAIRE,
-        TypeNbre::$ACTIF => Query::$SQL_SELECT_ALL_NBRE_ACTIF,
-        TypeNbre::$MANQUANT => Query::$SQL_SELECT_ALL_NBRE_MANQUANT,
-        TypeNbre::$DOMINANT => Query::$SQL_SELECT_ALL_NBRE_DOMINANT,
-        TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_ALL_NBRE_CHEMIN_VIE
-    ];
-    $res = "";
-    if (array_key_exists($type, $dico)){
-        $res = $dico[$type];
-    }
-    return $res;
-}
-
-/*
-PDOStatement::execute, prepare, query
-Errors/Exceptions
-- PDOException
-*/
-
-function getNbreInterResult($pdo, $nbre, $type){
-    $result = new ResultData(false, null, null);
-    try{
-        $stmt = $pdo->prepare(queryFromMethodType($type));
-        $stmt->execute(getNbreDico($nbre));
-        $nbreInter = null;
-        if ($stmt->rowCount() == 0){
-            $msg = "L interpretation du nbre ".$nbre." n est pas disponible en base";
-            $result->setMessage($msg);
-        }else{
-            $c = $stmt->fetch();
-            $nbreInter = new InterNbre($c["nbre"],$c["interpretation"]);
-            $result->setData($nbreInter);
-        }
-        http_response_code(200);
-    }catch(Exception $e){
-        $result->setError(true);
-        $result->setMessage($e->getMessage());
-        http_response_code(500);
-    }
-    return $result;
-}
-
-function getAllTypeNbreInterResult($pdo, $type){
-    $result = new ResultData(false, null, null);
-    try{
-        $all = $pdo->query(allDataQueryFromMethodType($type))->fetchAll();
-        $intersNbre = [];
-        foreach($all as $c){
-            $interNbre = new InterNbre($c["nbre"],$c["interpretation"]);
-            $intersNbre[] = $interNbre;
-        }
-        $result->setData($intersNbre);
-        http_response_code(200);
-    }catch(Exception $e){
-        echo "Erreur survenue : ".$e->getMessage();
-        $result->setError(true);
-        $result->setMessage($e->getMessage());
-        http_response_code(500);
-    }
-    return $result;
-}
-
 if ($_SERVER["REQUEST_METHOD"] == "GET"){
     $method= $_GET["method"];
     $params= $_GET["params"];
@@ -117,7 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
         if (count($tab) > 1){
             $type = strtolower($tab[0]);
             $nbre = $tab[1];
-            $result = getNbreInterResult($pdo, $nbre, $type);
+            $result = Util::getNbreInterResult($pdo, $nbre, $type);
         }else{
             $result->setError(true);
             $result->setMessage(Constants::$ERROR_400_MSG);
@@ -129,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
         $result = new ResultData(false, null, null);
         if (count($tab) > 0){
             $type = strtolower($tab[0]);
-            $result = getAllTypeNbreInterResult($pdo, $type);
+            $result = Util::getAllTypeNbreInterResult($pdo, $type);
             echo json_encode($result->getData());
         }else{
             $result->setMessage(Constants::$ERROR_400_MSG);

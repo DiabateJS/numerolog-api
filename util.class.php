@@ -1,119 +1,94 @@
 <?php
+
 class Util {
 
-    public static function createNoteDicoFromStringParams($params){
-        $tabParams = explode(";",$params);
-        $data = [];
-        if (count($tabParams) > 2){
-            $titre = $tabParams[0];
-            $contenu = $tabParams[1];
-            $idCategorie = $tabParams[2];
-            $data = [
-                "titre" => $titre,
-                "contenu" => $contenu,
-                "id_categorie" => $idCategorie
-            ];
-        }
-        return $data;
-    }
-
-    public static function createNoteDicoFromTabParams($tabParams){
-        $data = [];
-        if (count($tabParams) > 2){
-            $titre = $tabParams[0];
-            $contenu = $tabParams[1];
-            $idCategorie = $tabParams[2];
-            $data = [
-                "titre" => $titre,
-                "contenu" => $contenu,
-                "id_categorie" => $idCategorie
-            ];
-        }
-        return $data;
-    }
-
-    public static function createCategorieDicoFromStringParams($params){
-        $tabParams = explode(";",$params);
-        $categorieDico = [
-            "libelle" => $tabParams[0],
-            "couleur" => $tabParams[1]
-        ];
-        return $categorieDico;
-    }
-
-    public static function createCategorieDicoFromTabParams($tab){
-        $categorieDico = [];
-        if (count($tab) > 1){
-            $categorieDico = [
-                "libelle" => $tab[0],
-                "couleur" => $tab[1]
-            ];
-        }
-        return $categorieDico;
-    }
-
-    public static function updateCategorieDicoFromStringParams($params){
-        $tabParams = explode(";",$params);
-        $categorieDico = [
-            "id" => $tabParams[0],
-            "libelle" => $tabParams[1],
-            "couleur" => $tabParams[2]
-        ];
-        return $categorieDico;
-    }
-
-    public static function updateCategorieDicoFromTabParams($tab){
-        $categorieDico = [];
-        if (count($tab) > 1){
-            $categorieDico = [
-                "id" => $tab[0],
-                "libelle" => $tab[1],
-                "couleur" => $tab[2]
-            ];
-        }
-        return $categorieDico;
-    }
-
-    public static function updateNoteDicoFromStringParams($params){
-        $tabParams = explode(";",$params);
-        $noteDico = [
-            "id" => $tabParams[0],
-            "titre" => $tabParams[1],
-            "contenu" => $tabParams[2],
-            "id_categorie" => $tabParams[3]
-        ];
-        return $noteDico;
-    }
-
-    public static function updateNoteDicoFromTabParams($tab){
-        $noteDico = [];
-        if (count($tab) > 3){
-            $noteDico = [
-                "id" => $tab[0],
-                "titre" => $tab[1],
-                "contenu" => $tab[2],
-                "id_categorie" => $tab[3]
-            ];
-        }
-        return $noteDico;
-    }
-
-    public static function noteEntityToDico($note){
-        $data = [
-            "id" => $note->getId(),
-            "titre" => $note->getTitre(),
-            "contenu" => $note->getContenu(),
-            "id_categorie" => $note->getCategorie()
-        ];
-        return $data;
+    /*
+PDOStatement::execute, prepare, query
+Errors/Exceptions
+- PDOException
+*/
+    static function getNbreDico($nbre){
+        return [
+               "nbre" => $nbre
+           ];
     }
     
-    public static function categorieEntityToDico($categorie){
-        $data = [
-            "id" => $categorie->getId(),
-            "libelle" => $categorie->getLibelle(),
-            "couleur" => $categorie->getCouleur()
+    static function queryFromMethodType($type){
+        $dico = [
+            TypeNbre::$INTIME => Query::$SQL_SELECT_NBRE_INTIME,
+            TypeNbre::$REALISATION => Query::$SQL_SELECT_NBRE_REALISATION,
+            TypeNbre::$EXPRESSION => Query::$SQL_SELECT_NBRE_EXPRESSION,
+            TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_NBRE_HEREDITAIRE,
+            TypeNbre::$ACTIF => Query::$SQL_SELECT_NBRE_ACTIF,
+            TypeNbre::$MANQUANT => Query::$SQL_SELECT_NBRE_MANQUANT,
+            TypeNbre::$DOMINANT => Query::$SQL_SELECT_NBRE_DOMINANT,
+            TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_NBRE_CHEMIN_VIE
         ];
-        return $data;
+        $res = "";
+        if (array_key_exists($type, $dico)){
+            $res = $dico[$type];
+        }
+        return $res;
+    }
+    
+    static function allDataQueryFromMethodType($type){
+        $dico = [
+            TypeNbre::$INTIME => Query::$SQL_SELECT_ALL_NBRE_INTIME,
+            TypeNbre::$REALISATION => Query::$SQL_SELECT_ALL_NBRE_REALISATION,
+            TypeNbre::$EXPRESSION => Query::$SQL_SELECT_ALL_NBRE_EXPRESSION,
+            TypeNbre::$HEREDITAIRE => Query::$SQL_SELECT_ALL_NBRE_HEREDITAIRE,
+            TypeNbre::$ACTIF => Query::$SQL_SELECT_ALL_NBRE_ACTIF,
+            TypeNbre::$MANQUANT => Query::$SQL_SELECT_ALL_NBRE_MANQUANT,
+            TypeNbre::$DOMINANT => Query::$SQL_SELECT_ALL_NBRE_DOMINANT,
+            TypeNbre::$CHEMIN_VIE => Query::$SQL_SELECT_ALL_NBRE_CHEMIN_VIE
+        ];
+        $res = "";
+        if (array_key_exists($type, $dico)){
+            $res = $dico[$type];
+        }
+        return $res;
+    }
+
+    static function getNbreInterResult($pdo, $nbre, $type){
+        $result = new ResultData(false, null, null);
+        try{
+            $stmt = $pdo->prepare(self::queryFromMethodType($type));
+            $stmt->execute(self::getNbreDico($nbre));
+            $nbreInter = null;
+            if ($stmt->rowCount() == 0){
+                $msg = "L interpretation du nbre ".$nbre." n est pas disponible en base";
+                $result->setMessage($msg);
+            }else{
+                $c = $stmt->fetch();
+                $nbreInter = new InterNbre($c["nbre"],$c["interpretation"]);
+                $result->setData($nbreInter);
+            }
+            http_response_code(200);
+        }catch(Exception $e){
+            $result->setError(true);
+            $result->setMessage($e->getMessage());
+            http_response_code(500);
+        }
+        return $result;
+    }
+
+    static function getAllTypeNbreInterResult($pdo, $type){
+        $result = new ResultData(false, null, null);
+        try{
+            $all = $pdo->query(self::allDataQueryFromMethodType($type))->fetchAll();
+            $intersNbre = [];
+            foreach($all as $c){
+                $interNbre = new InterNbre($c["nbre"],$c["interpretation"]);
+                $intersNbre[] = $interNbre;
+            }
+            $result->setData($intersNbre);
+            http_response_code(200);
+        }catch(Exception $e){
+            echo "Erreur survenue : ".$e->getMessage();
+            $result->setError(true);
+            $result->setMessage($e->getMessage());
+            http_response_code(500);
+        }
+        return $result;
     }
 }
