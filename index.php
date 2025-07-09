@@ -5,32 +5,14 @@ include "queries.class.php";
 include "internbre.class.php";
 include "util.class.php";
 
+include "method.constants.class.php";
+include "typenbre.constants.class.php";
+include "constants.class.php";
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: *');
 header('Access-Control-Allow-Headers: *');
 header('Content-Type: application/json');
-
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-];
-
-$ERROR_400_MSG = "Erreur de formulation de la requete : Nbre de parametres insuffisants";
-
-class Method {
-    static $NBRE_INTER = "getNbreInter";
-    static $ALL_NBRE_INTER = "getAllNbreInter";
-}
-
-class TypeNbre {
-    static $INTIME = "nbre_intime";
-    static $REALISATION = "nbre_realisation";
-    static $EXPRESSION = "nbre_expression";
-    static $HEREDITAIRE = "nbre_hereditaire";
-    static $ACTIF = "nbre_actif";
-    static $MANQUANT = "nbre_manquant";
-    static $DOMINANT = "nbre_dominant";
-    static $CHEMIN_VIE = "nbre_chemin_vie";
-}
 
 
 function getNbreDico($nbre){
@@ -97,7 +79,6 @@ function getNbreInterResult($pdo, $nbre, $type){
         }
         http_response_code(200);
     }catch(Exception $e){
-        echo "Erreur survenue : ".$e->getMessage();
         $result->setError(true);
         $result->setMessage($e->getMessage());
         http_response_code(500);
@@ -139,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
             $result = getNbreInterResult($pdo, $nbre, $type);
         }else{
             $result->setError(true);
-            $result->setMessage($ERROR_400_MSG);
+            $result->setMessage(Constants::$ERROR_400_MSG);
             http_response_code(400);
         }
         echo json_encode($result);
@@ -151,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "GET"){
             $result = getAllTypeNbreInterResult($pdo, $type);
             echo json_encode($result->getData());
         }else{
-            $result->setMessage($ERROR_400_MSG);
+            $result->setMessage(Constants::$ERROR_400_MSG);
             http_response_code(400);
             echo json_encode($result);
         }
