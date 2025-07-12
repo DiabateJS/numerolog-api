@@ -32,3 +32,26 @@ function testGetCharCode(){
 }
 
 testGetCharCode();
+
+function testReductionNum(){
+    //0 return 0;
+    $nbre = 0;
+    echo "reductionNum(0) return 0 => ";
+    $test = Util::reductionNum($nbre);
+    if ($test == 0){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
+    echo "<br>";
+    //5 return 5 , 9 return 9 , 17 return 8
+    $test1 = Util::reductionNum(5) == 5 and Util::reductionNum(9) == 9 and Util::reductionNum(17) == 8;
+    echo "reductionNum(5) = 5  , reductionNum(9) = 9 , reductionNum(17) = 8 =>  ";
+    if ($test1){
+        echo "OK";
+    }else{
+        echo "KO";
+    }    
+}
+
+testReductionNum();

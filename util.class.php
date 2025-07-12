@@ -103,5 +103,13 @@ Errors/Exceptions
         }
         return $res;  
     }
+
+    static function reductionNum($nbre){
+        $res = 0;
+        if ($nbre > 0){
+            $res = $nbre % 9 == 0 ? 9 : $nbre % 9;
+        }
+        return $res;
+    }
     
 }
