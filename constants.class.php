@@ -1,4 +1,32 @@
 <?php
 class Constants {
     static $ERROR_400_MSG = "Erreur de formulation de la requete : Nbre de parametres insuffisants";
+    static $TAB_CORRESPONDANCE = [
+        "A" => 1,
+        "J" => 1,
+        "S" => 1,
+        "B" => 2,
+        "K" => 2,
+        "T" => 2,
+        "C" => 3,
+        "L" => 3,
+        "U" => 3,
+        "D" => 4,
+        "M" => 4,
+        "V" => 4,
+        "E" => 5,
+        "N" => 5,
+        "W" => 5,
+        "F" => 6,
+        "O" => 6,
+        "X" => 6,
+        "G" => 7,
+        "P" => 7,
+        "Y" => 7,
+        "H" => 8,
+        "Q" => 8,
+        "Z" => 8,
+        "I" => 9,
+        "R" => 9
+    ];
 }

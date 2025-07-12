@@ -1,4 +1,5 @@
 <?php
+include "constants.class.php";
 
 class Util {
 
@@ -91,4 +92,16 @@ Errors/Exceptions
         }
         return $result;
     }
+
+    static function getCharCode($c){
+        $dico = Constants::$TAB_CORRESPONDANCE;
+        $res = 0;
+        foreach ($dico as $key => $value){
+            if ($key == strtoupper($c)){
+                $res = $value;
+            }
+        }
+        return $res;  
+    }
+    
 }
