@@ -29,4 +29,6 @@ class Constants {
         "I" => 9,
         "R" => 9
     ];
+    static $CONSONNES = "JSBKTCÇLDMVNWFXGPHQZR";
+    static $VOYELLES = "AEOUIYÀÄÛÜÉÈÊËÔÖÎÏ";
 }

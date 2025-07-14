@@ -60,6 +60,15 @@ function testReductionNum(){
     }else{
         echo "KO";
     }
+    echo "<br>";
+    echo "isConsonne(A) is false - isVoyelle(O) is true - isConsonne(Z) is true - isVoyelle(T) is false => ";
+    $test3 = !Util::isConsonne('A') and Util::isVoyelle('O') and Util::isConsonne('Z') and !Util::isVoyelle('T');
+    if ($test3){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
+    echo "<br>";
 }
 
 testReductionNum();

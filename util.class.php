@@ -121,5 +121,25 @@ Errors/Exceptions
         $res = self::reductionNum($res);
         return $res;
     }
+
+    static function isConsonne($char){
+        $res = false;
+        if (strlen($char) == 1){ 
+            if (strpos(Constants::$CONSONNES, strtoupper($char)) >= 0){
+                $res = false;
+            }
+        }
+        return $res;
+    }
+
+    static function isVoyelle($char){
+        $res = false;
+        if (strlen($char) == 1){
+            if (strpos(Constants::$VOYELLES, strtoupper($char)) >= 0){
+                $res = true;
+            }
+        }
+        return $res;
+    }
     
 }
