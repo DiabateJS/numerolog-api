@@ -51,7 +51,15 @@ function testReductionNum(){
         echo "OK";
     }else{
         echo "KO";
-    }    
+    }
+    echo "<br>";
+    echo "reductionChaine(Jean Sekou) = 2 => ";
+    $test2 = Util::reductionChaine('Jean Sekou');
+    if ($test2 == 2){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
 }
 
 testReductionNum();

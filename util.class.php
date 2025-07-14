@@ -111,5 +111,15 @@ Errors/Exceptions
         }
         return $res;
     }
+
+    static function reductionChaine($chaine){
+        $res = 0;
+        $tab = str_split($chaine);
+        foreach($tab as $letter){
+            $res += self::getCharCode($letter);
+        }
+        $res = self::reductionNum($res);
+        return $res;
+    }
     
 }
