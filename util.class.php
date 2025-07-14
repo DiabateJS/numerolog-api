@@ -239,13 +239,7 @@ Errors/Exceptions
     }
 
     static function getNbreExpression($word){
-        $res = 0;
-        $tab = str_split($word);
-        foreach($tab as $letter){
-            $res += self::getCharCode($letter);
-        }
-        $res = self::reductionNum($res);
-        return $res;
+        return self::reductionChaine($word);
     }
     
 }
