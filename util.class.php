@@ -125,8 +125,65 @@ Errors/Exceptions
     static function isConsonne($char){
         $res = false;
         if (strlen($char) == 1){ 
-            if (strpos(Constants::$CONSONNES, strtoupper($char)) >= 0){
-                $res = false;
+            if (strtoupper($char) == "J"){
+                $res = true;
+            }
+            if (strtoupper($char) == "S"){
+                $res = true;
+            }
+            if (strtoupper($char) == "B"){
+                $res = true;
+            }
+            if (strtoupper($char) == "K"){
+                $res = true;
+            }
+            if (strtoupper($char) == "T"){
+                $res = true;
+            }
+            if (strtoupper($char) == "C"){
+                $res = true;
+            }
+            if (strtoupper($char) == "L"){
+                $res = true;
+            }
+            if (strtoupper($char) == "D"){
+                $res = true;
+            }
+            if (strtoupper($char) == "M"){
+                $res = true;
+            }
+            if (strtoupper($char) == "V"){
+                $res = true;
+            }
+            if (strtoupper($char) == "N"){
+                $res = true;
+            }
+            if (strtoupper($char) == "W"){
+                $res = true;
+            }
+            if (strtoupper($char) == "F"){
+                $res = true;
+            }
+            if (strtoupper($char) == "X"){
+                $res = true;
+            }
+            if (strtoupper($char) == "G"){
+                $res = true;
+            }
+            if (strtoupper($char) == "P"){
+                $res = true;
+            }
+            if (strtoupper($char) == "H"){
+                $res = true;
+            }
+            if (strtoupper($char) == "Q"){
+                $res = true;
+            }
+            if (strtoupper($char) == "Z"){
+                $res = true;
+            }
+            if (strtoupper($char) == "R"){
+                $res = true;
             }
         }
         return $res;
@@ -135,10 +192,59 @@ Errors/Exceptions
     static function isVoyelle($char){
         $res = false;
         if (strlen($char) == 1){
-            if (strpos(Constants::$VOYELLES, strtoupper($char)) >= 0){
+            if (strtoupper($char) == "A"){
+                $res = true;
+            }
+            if (strtoupper($char) == "E"){
+                $res = true;
+            }
+            if (strtoupper($char) == "O"){
+                $res = true;
+            }
+            if (strtoupper($char) == "U"){
+                $res = true;
+            }
+            if (strtoupper($char) == "I"){
+                $res = true;
+            }
+            if (strtoupper($char) == "Y"){
                 $res = true;
             }
         }
+        return $res;
+    }
+
+    static function getNbreIntime($word){
+        $res = 0;
+        $tab = str_split($word);
+        foreach($tab as $letter){
+            if (self::isVoyelle($letter)){
+                $res += self::getCharCode($letter);
+            }
+        }
+        $res = self::reductionNum($res);
+        return $res;       
+    }
+
+    static function getNbreRealisation($word){
+        $res = 0;
+        $tab = str_split($word);
+        foreach($tab as $letter){
+            if (self::isConsonne($letter)){
+                $res += self::getCharCode($letter);
+            }
+        }
+        $res = self::reductionNum($res);
+        return $res;
+    }
+
+    static function getNbreExpression($word){
+        $res = 0;
+        $tab = str_split($word);
+        foreach($tab as $letter){
+            $res += self::getCharCode($letter);
+        }
+        $res = self::reductionNum($res);
         return $res;
     }
     

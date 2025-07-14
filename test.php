@@ -69,6 +69,30 @@ function testReductionNum(){
         echo "KO";
     }
     echo "<br>";
+    echo "getNbreIntime(azerty)=4 => ";
+    $test4 = Util::getNbreIntime("azerty");
+    if ($test4 == 4){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
+    echo "<br>";
+    echo "getNbreRealisation(azerty)=1 => ";
+    $test5 = Util::getNbreRealisation("azerty");
+    if ($test5 == 1){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
+    echo "<br>";
+    echo "getNbreExpression(azerty)=5 => ";
+    $test6 = Util::getNbreExpression("azerty");
+    if ($test6 == 5){
+        echo "OK";
+    }else{
+        echo "KO";
+    }
+    echo "<br>";
 }
 
 testReductionNum();
