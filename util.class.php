@@ -214,9 +214,9 @@ Errors/Exceptions
         return $res;
     }
 
-    static function getNbreIntime($word){
+    static function getNbreIntime($fullname){
         $res = 0;
-        $tab = str_split($word);
+        $tab = str_split($fullname);
         foreach($tab as $letter){
             if (self::isVoyelle($letter)){
                 $res += self::getCharCode($letter);
@@ -226,9 +226,9 @@ Errors/Exceptions
         return $res;       
     }
 
-    static function getNbreRealisation($word){
+    static function getNbreRealisation($fullname){
         $res = 0;
-        $tab = str_split($word);
+        $tab = str_split($fullname);
         foreach($tab as $letter){
             if (self::isConsonne($letter)){
                 $res += self::getCharCode($letter);
@@ -238,8 +238,8 @@ Errors/Exceptions
         return $res;
     }
 
-    static function getNbreExpression($word){
-        return self::reductionChaine($word);
+    static function getNbreExpression($fullname){
+        return self::reductionChaine($fullname);
     }
     
 }
